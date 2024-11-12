@@ -1,0 +1,44 @@
+image:
+  name: oowy/opentofu:latest
+  entrypoint:
+    - '/usr/bin/env'
+    - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+before_script:
+  - tofu --version
+  - tofu init
+
+stages:
+  - validate
+  - plan
+  - apply
+  - destroy
+
+validate:
+  stage: validate
+  script:
+    - tofu validate
+
+plan:
+  stage: plan
+  script:
+    - tofu plan -out planfile
+  dependencies:
+    - validate
+  artifacts:
+    paths:
+      - planfile
+
+apply:
+  stage: apply
+  script:
+    - tofu apply planfile
+  dependencies:
+    - plan
+  
+
+destroy: 
+  stage: destroy
+  script:
+    - tofu destroy --auto-approve
+
